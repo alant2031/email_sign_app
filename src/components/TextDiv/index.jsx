@@ -8,7 +8,7 @@ const TextDivComp = React.forwardRef((props, ref) => {
     e.target.style.top = e.clientY + "px"
   }
   return (
-    <S.TDiv draggable onDragEnd={setPosition} ref={ref}>
+    <S.TDiv draggable onDragEnd={setPosition} ref={ref} id={props.id}>
       {props.fieldName}
     </S.TDiv>
   );

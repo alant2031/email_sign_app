@@ -1,6 +1,6 @@
 import React from "react";
-import { TextDiv, Radio, Flex, TextSelect } from "./components";
-import { GlobalStyle } from "./utils";
+import { TextDiv, Radio, Flex, TextSelect, QRCode } from "./components";
+import { GlobalStyle, setUrl } from "./utils";
 import grupoImg from "src/static/grupo.png";
 import dafImg from "src/static/daf.png";
 import agroImg from "src/static/agro.png";
@@ -26,28 +26,70 @@ function App() {
     []
   );
   const fields = React.useMemo(
-    () => ["NOME", "ENDEREÇO", "CARGO", "CEP", "TEL 1", "TEL 2"],
+    () => [
+      { label: "NOME", id: "full_name" },
+      { label: "ENDEREÇO", id: "address" },
+      { label: "CARGO", id: "role" },
+      { label: "CEP", id: "zip_code" },
+      { label: "EMAIL", id: "email" },
+      { label: "TEL 1", id: "tel1" },
+      { label: "TEL 2", id: "tel2" },
+    ],
     []
   );
   const refs = React.useRef([]);
+  const [showQR, setShowQR] = React.useState(false);
+  const [showDiv, setShowDiv] = React.useState(true);
+  const [source, setSource] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const handleQR = React.useCallback((ev) => {
+    setShowQR(ev);
+  }, []);
+  const generateSrc = React.useCallback((atr) => {
+    const src = setUrl(atr);
+    setSource(src);
+    setShowDiv(false);
+  }, []);
   const [image, setImage] = React.useState(grupoImg);
   return (
     <React.Fragment>
       <GlobalStyle img={image} />
-      {fields.map((fieldName, key) => {
+      {fields.map((field, key) => {
         return (
           <React.Fragment key={key}>
             <TextDiv
+              id={field.id}
               ref={(element) => refs.current.push(element)}
-              fieldName={fieldName}
+              fieldName={field.label}
             />
           </React.Fragment>
         );
       })}
+      <QRCode show={showQR} source={source} />
       <Flex>
         <Radio title="Empresa:" items={items} handle={setImage} name="logos" />
-        <TextSelect refs={refs.current} />
-        <Radio title="QR Code:" items={options} handle={() => {}} name="QR" />
+        <TextSelect
+          refs={refs.current}
+          handleName={setName}
+          handlePhone={setPhone}
+          handleEmail={setEmail}
+        />
+        <div
+          style={{
+            display: showDiv ? null : "none",
+          }}
+        >
+          <Radio title="QR Code:" items={options} handle={handleQR} name="QR" />
+          <button
+            type="button"
+            disabled={!showQR}
+            onClick={() => generateSrc({ name, phone, email })}
+          >
+            Gerar
+          </button>
+        </div>
       </Flex>
     </React.Fragment>
   );
